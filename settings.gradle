@@ -1,2 +1,4 @@
 rootProject.name = 'adv-java-monopoly'
 include('core')
+include 'simulation'
+
