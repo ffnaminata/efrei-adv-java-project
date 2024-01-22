@@ -25,4 +25,11 @@ unit-test-job:
   script:
     - echo "Running unit tests... This will take about 60 seconds."
     - ./gradlew test
+  artifacts:
+    when: always
+    paths:
+      - simulation/build/test-results/test/*.xml
+    expire_in: 8 week
+    reports:
+      junit: simulation/build/test-results/test/*.xml
 
