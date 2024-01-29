@@ -8,27 +8,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
 
 public class MonopolyImplement implements Monopoly {
     private Dices dices;
-    private List<LocationImplement> board;
+    private Map<String, Location> board;
 
-    public MonopolyImplement(String filePath, Dices dices) {
+    public MonopolyImplement(Dices dices, String filePath) {
         this.dices = dices;
-        this.board = new ArrayList<>();
-        parseCSV();
+        this.board = new HashMap<>();
+        parseCSV(filePath);
     }
 
-    public MonopolyImplement(Dices dices, List<String> playersName){
-        parseCSV();
-        this.dices = dices;
-    }
-
-    private void parseCSV() {
-        String filePath = "/Users/aminata/Documents/cours/Semestre 6/JavaAvance/efrei-adv-java-project/core/src/main/resources/monopoly.csv";
+    private void parseCSV(String filePath) {
         try (InputStream inputStream = getClass().getResourceAsStream(filePath);
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
@@ -36,12 +30,12 @@ public class MonopolyImplement implements Monopoly {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 String name = parts[0].trim();
-                String kind = parts[1].trim().toUpperCase();
+                Location.LocationKind kind = Location.LocationKind.valueOf(parts[1].trim().toUpperCase());
                 String color = parts[2].trim();
                 int price = parts.length > 3 ? Integer.parseInt(parts[3].trim()) : 0;
 
-                LocationImplement boardCase = new LocationImplement(name, kind, color, price);
-                board.add(boardCase);
+                LocationImplement location = new LocationImplement(name, kind, color, price);
+                board.put(name, location);
             }
 
         } catch (IOException | NumberFormatException e) {
@@ -49,19 +43,18 @@ public class MonopolyImplement implements Monopoly {
         }
     }
 
-    public List<LocationImplement> getBoard() {
+    public Map<String, Location> getBoard() {
         return board;
     }
 
     @Override
     public void submitOrder(String playerName, OrderKind order) {
-
+        // Implémentez cette méthode pour gérer les actions des joueurs
     }
 
     @Override
     public Map<String, Location> getPlayersLocation() {
+        // Implémentez cette méthode pour renvoyer l'emplacement des joueurs sur le plateau
         return null;
     }
 }
-
-
