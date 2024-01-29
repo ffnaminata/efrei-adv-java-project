@@ -4,7 +4,7 @@ package fr.diopfofana.efrei.monopoly.simulation;
 import fr.arsenelapostolet.efrei.monopoly.Dices;
 
 import java.util.Random;
-public class DicesImp implements Dices{
+public class DicesImplement implements Dices{
     private int throwOneSixSidedDices(){
         Random randomNumber = new Random();
         return randomNumber.nextInt(6) + 1;

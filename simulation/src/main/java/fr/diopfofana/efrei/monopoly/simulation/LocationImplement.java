@@ -1,23 +1,27 @@
 package fr.diopfofana.efrei.monopoly.simulation;
 
-public class Case {
+import fr.arsenelapostolet.efrei.monopoly.Location;
+
+public class LocationImplement implements Location {
     private String name;
-    private String kind;
+    private LocationKind kind;
     private String color;
     private int price;
 
-    public Case(String name, String kind, String color, int price) {
+    public LocationImplement(String name, LocationKind kind, String color, int price) {
         this.name = name;
         this.kind = kind;
         this.color = color;
         this.price = price;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
-    public String getKind() {
+    @Override
+    public LocationKind getKind() {
         return kind;
     }
 
@@ -28,5 +32,4 @@ public class Case {
     public int getPrice(){
         return price;
     }
-
 }
