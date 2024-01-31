@@ -8,10 +8,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.HashMap;
+
 
 
 public class MonopolyImplement implements Monopoly {
@@ -19,20 +20,27 @@ public class MonopolyImplement implements Monopoly {
     private List<Location> board;
     private List<String> playersName;
     private Map<String, Location> playersLocation;
+    private int currentPlayerIndex;
+    private boolean firstOrderSubmitted;
 
 
     public MonopolyImplement(Dices dices, List<String> playersName) {
         this.dices = dices;
         this.playersName = playersName;
         this.board = new ArrayList<>();
+        this.playersLocation = new HashMap<>();
+        this.currentPlayerIndex=0;
+        this.firstOrderSubmitted = false;
         parseCSV();
 
         // Initialiser la position de chaque joueur
         for (String playerName : playersName) {
                 // Initialiser la position du joueur au début du plateau
-                Location playerLocation = board.get(1); // Position de départ
+                Location playerLocation = board.get(0); // Position de départ
                 this.playersLocation.put(playerName, playerLocation);
             }
+
+        submitOrder(playersName.get(this.currentPlayerIndex), OrderKind.IDLE);
         }
 
 
@@ -43,11 +51,16 @@ public class MonopolyImplement implements Monopoly {
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String line;
+            boolean isFirstLine = true;
             while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {//Pour ignorer la premiere ligne du fichier csv
+                    isFirstLine = false;
+                    continue; // Passer à la ligne suivante
+                }
                 String[] parts = line.split(",");
                 String name = parts[0].trim();
                 Location.LocationKind kind = Location.LocationKind.valueOf(parts[1].trim().toUpperCase());
-                String color = parts[2].trim();
+                String color = parts.length > 2 ? parts[2].trim() : "";
                 int price = parts.length > 3 ? Integer.parseInt(parts[3].trim()) : 0;
 
                 LocationImplement location = new LocationImplement(name, kind, color, price);
@@ -65,16 +78,38 @@ public class MonopolyImplement implements Monopoly {
 
     @Override
     public void submitOrder(String playerName, OrderKind order) {
-        Location currentLocation = playersLocation.get(playerName);
-        int IndexOfCurrentLocation= this.board.indexOf(currentLocation);
-       if (order == OrderKind.IDLE){
-           if (IndexOfCurrentLocation== board.size()){//If we get the end of the board we restart at the index 0
-               playersLocation.put(playerName, board.get(this.dices.throwTwoSixSidedDices()));
-           }
-           else {
-               playersLocation.put(playerName, board.get(IndexOfCurrentLocation + this.dices.throwTwoSixSidedDices()));
-           }
-       }
+
+        // Vérifiez si c'est le premier appel de la fonction
+        if (!firstOrderSubmitted) {
+            Location currentLocation = playersLocation.get(playerName);
+            int IndexOfCurrentLocation = this.board.indexOf(currentLocation);
+
+            if (order == OrderKind.IDLE) {
+                    playersLocation.put(playerName, board.get(IndexOfCurrentLocation + this.dices.throwTwoSixSidedDices()));
+                }
+
+            firstOrderSubmitted = true; //  le premier ordre a été soumis
+        }else{
+            int nextPlayerIndex = (currentPlayerIndex + 1) % playersName.size();
+            if(!playersName.get(this.currentPlayerIndex).equals(playerName)){
+                //
+            }
+            else {
+                playerName= playersName.get(nextPlayerIndex);//FaireAvancer le joueur suivant
+                Location currentLocation = playersLocation.get(playerName);
+                int IndexOfCurrentLocation = this.board.indexOf(currentLocation);
+
+                if (order == OrderKind.IDLE) {
+                    if (IndexOfCurrentLocation == board.size() - 1) {//If we get the end of the board we restart at the index 0
+                        playersLocation.put(playerName, board.get(this.dices.throwTwoSixSidedDices()));
+                    } else {
+                        playersLocation.put(playerName, board.get(IndexOfCurrentLocation + this.dices.throwTwoSixSidedDices()));
+                    }
+                }
+                currentPlayerIndex = nextPlayerIndex ;
+            }
+        }
+
     }
 
     @Override
