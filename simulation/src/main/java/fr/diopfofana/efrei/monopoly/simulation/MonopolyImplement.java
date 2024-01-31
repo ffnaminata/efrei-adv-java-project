@@ -100,16 +100,14 @@ public class MonopolyImplement implements Monopoly {
                 int IndexOfCurrentLocation = this.board.indexOf(currentLocation);
 
                 if (order == OrderKind.IDLE) {
-                    if (IndexOfCurrentLocation == board.size() - 1) {//If we get the end of the board we restart at the index 0
-                        playersLocation.put(playerName, board.get(this.dices.throwTwoSixSidedDices()));
-                    } else {
-                        playersLocation.put(playerName, board.get(IndexOfCurrentLocation + this.dices.throwTwoSixSidedDices()));
+                        int nextLocationIndex = (IndexOfCurrentLocation + this.dices.throwTwoSixSidedDices()) %board.size();
+                        playersLocation.put(playerName, board.get(nextLocationIndex));
                     }
-                }
-                currentPlayerIndex = nextPlayerIndex ;
-            }
-        }
 
+                currentPlayerIndex = nextPlayerIndex ;
+                }
+
+            }
     }
 
     @Override
