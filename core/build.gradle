@@ -30,3 +30,8 @@ idea {
         downloadJavadoc = true
     }
 }
+idea {
+    module {
+        downloadJavadoc = true
+    }
+}
