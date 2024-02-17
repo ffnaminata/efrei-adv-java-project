@@ -56,7 +56,7 @@ public abstract class BaseMonopolyTests {
         final var locations = monopoly.getPlayersLocation();
 
         assertPlayerIsOnLocation(locations, player1, "Rue Victor Hugo", Location.LocationKind.PROPERTY);
-        assertPlayerIsOnLocation(locations, player2, "Départ", Location.LocationKind.STATION);
+        assertPlayerIsOnLocation(locations, player2, "Départ", Location.LocationKind.START);
         assertPlayerIsOnLocation(locations, player3, "Départ", Location.LocationKind.START);
         assertPlayerIsOnLocation(locations, player4, "Départ", Location.LocationKind.START);
     }
