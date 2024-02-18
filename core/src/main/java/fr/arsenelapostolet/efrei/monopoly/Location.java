@@ -6,6 +6,8 @@ public interface Location {
 
     LocationKind getKind();
 
+    String getOwner();
+
     enum LocationKind {
         START,
         PROPERTY,
