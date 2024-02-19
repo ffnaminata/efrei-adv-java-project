@@ -26,7 +26,7 @@ public class Parser {
                 String color = parts.length > 2 ? parts[2].trim() : "";
                 int price = parts.length > 3 ? Integer.parseInt(parts[3].trim()) : 0;
 
-                LocationImplement location = new LocationImplement(name, kind, color, price);
+                LocationImplement location = new LocationImplement(name, kind, color, price,0);
                 board.add(location);
             }
 

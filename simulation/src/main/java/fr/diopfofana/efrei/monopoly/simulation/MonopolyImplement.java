@@ -4,6 +4,7 @@ import fr.arsenelapostolet.efrei.monopoly.Location;
 import fr.arsenelapostolet.efrei.monopoly.Monopoly;
 import fr.arsenelapostolet.efrei.monopoly.OrderKind;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class MonopolyImplement implements Monopoly {
     private final List<Location> board;
     private final List<String> playersName;
     private final Map<String, Location> playersLocation;
+    private  Map<String, BigDecimal> playersBalance;
     private int currentPlayerIndex;
     private boolean firstOrderSubmitted;
 
@@ -25,9 +27,11 @@ public class MonopolyImplement implements Monopoly {
         this.playersName = playersName;
         this.board = new ArrayList<>();
         this.playersLocation = new HashMap<>();
-        this.currentPlayerIndex=0;
+        this.playersBalance = new HashMap<>();
+        this.currentPlayerIndex = 0;
         Parser.parseCSV(this.board);
         initialisePlayersPosition();
+        initalisePlayersBalance();
         firstOrderSubmitted(playersName.get(this.currentPlayerIndex), OrderKind.IDLE);
         }
 
@@ -39,6 +43,14 @@ public class MonopolyImplement implements Monopoly {
             // Initialiser la position du joueur au début du plateau
             Location playerLocation = this.board.get(0); // Position de départ
             this.playersLocation.put(playerName, playerLocation);
+        }
+    }
+
+    // Initialiser la balance de chaques joueur
+    private void initalisePlayersBalance(){
+        BigDecimal playerBalance = new BigDecimal("1500");
+        for (String playerName : this.playersName) {
+            this.playersBalance.put(playerName, playerBalance);
         }
     }
 
@@ -78,5 +90,10 @@ public class MonopolyImplement implements Monopoly {
     @Override
     public Map<String, Location> getPlayersLocation() {
         return  new HashMap<>(playersLocation);
+    }
+
+    @Override
+    public Map<String, BigDecimal> getPlayersBalance() {
+        return playersBalance;
     }
 }

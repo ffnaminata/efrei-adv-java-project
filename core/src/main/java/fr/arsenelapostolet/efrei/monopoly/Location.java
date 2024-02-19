@@ -8,6 +8,8 @@ public interface Location {
 
     String getOwner();
 
+    int getBare();
+
     enum LocationKind {
         START,
         PROPERTY,
