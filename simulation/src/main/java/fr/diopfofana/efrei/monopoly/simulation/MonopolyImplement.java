@@ -1,8 +1,5 @@
 package fr.diopfofana.efrei.monopoly.simulation;
-import fr.arsenelapostolet.efrei.monopoly.Dices;
-import fr.arsenelapostolet.efrei.monopoly.Location;
-import fr.arsenelapostolet.efrei.monopoly.Monopoly;
-import fr.arsenelapostolet.efrei.monopoly.OrderKind;
+import fr.arsenelapostolet.efrei.monopoly.*;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -59,13 +56,19 @@ public class MonopolyImplement implements Monopoly {
         int currentPlayerIndex = playersName.indexOf(playerName);
         Location currentPlayerLocation = playersLocation.get(playerName);
 
-        if (order == OrderKind.BUY && Objects.equals(currentPlayerLocation.getOwner(), "")){
+        if (order == OrderKind.BUY && Objects.equals(currentPlayerLocation.getOwner(), "") && playersBalance.get(playerName).compareTo(BigDecimal.valueOf(currentPlayerLocation.getPrice())) >= 0 ){
             if (currentPlayerLocation.getKind() == Location.LocationKind.PROPERTY ||
                     currentPlayerLocation.getKind() == Location.LocationKind.STATION ||
                     currentPlayerLocation.getKind() == Location.LocationKind.COMPANY ){
                 playersBalance.put(playerName, playersBalance.get(playerName).subtract(BigDecimal.valueOf(currentPlayerLocation.getPrice())));
                 currentPlayerLocation.setOwner(playerName);
             }
+        }
+
+        BigDecimal nullValue = new BigDecimal(0);
+        if (playersBalance.get(playerName).compareTo(nullValue) <= 0){
+            playersBalance.remove(playerName);
+            playersLocation.remove(playerName);
         }
 
         int nextPlayerIndex = (currentPlayerIndex + 1) % playersName.size();
@@ -75,33 +78,64 @@ public class MonopolyImplement implements Monopoly {
         if (this.currentPlayerIndex == nextPlayerIndex){
             int IndexOfNextPlayerLocation = this.board.indexOf(nextPlayerLocation);
 
-            int newNextPlayerLocationIndex = (IndexOfNextPlayerLocation + this.dices.throwTwoSixSidedDices()) % board.size();
+            int dicesResult = this.dices.throwTwoSixSidedDices();
+            int newNextPlayerLocationIndex = (IndexOfNextPlayerLocation + dicesResult) % board.size();
             playersLocation.put(nextPlayerName, board.get(newNextPlayerLocationIndex));
             nextPlayerLocation = playersLocation.get(nextPlayerName);
 
             this.currentPlayerIndex = (nextPlayerIndex + 1) % playersName.size();
-        }
 
-        String s = nextPlayerLocation.getOwner();
-        Boolean b = nextPlayerLocation.getOwner().isEmpty();
-        if (!nextPlayerLocation.getOwner().isEmpty()){
-            switch (nextPlayerLocation.getKind()){
-                case PROPERTY :
-                    BigDecimal oldNextPlayerBalance = playersBalance.get(nextPlayerName);
-                    playersBalance.put(nextPlayerName, oldNextPlayerBalance.subtract(BigDecimal.valueOf(nextPlayerLocation.getBare())));
-                    playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(BigDecimal.valueOf(nextPlayerLocation.getBare())));
-                    break;
-                case STATION :
-                    playersBalance.put(nextPlayerName, playersBalance.get(nextPlayerName).subtract(BigDecimal.valueOf(25)));
-                    playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(BigDecimal.valueOf(25)));
-                    break;
-                case COMPANY:
+            if (!nextPlayerLocation.getOwner().isEmpty()){
+                BigDecimal oldNextPlayerBalance = playersBalance.get(nextPlayerName);
+                switch (nextPlayerLocation.getKind()){
+                    case PROPERTY :
+                        BigDecimal rentAmountProperty = BigDecimal.valueOf(nextPlayerLocation.getBare());
+                        if (oldNextPlayerBalance.compareTo(rentAmountProperty) < 0){
+                            rentAmountProperty = oldNextPlayerBalance;
+                        }
+                        playersBalance.put(nextPlayerName, oldNextPlayerBalance.subtract(rentAmountProperty));
+                        playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(rentAmountProperty));
+                        break;
 
-                    break;
-                default:
-                    break;
+                    case STATION :
+                        BigDecimal rentAmountStation = BigDecimal.valueOf(25);
+                        if (oldNextPlayerBalance.compareTo(rentAmountStation) < 0){
+                            rentAmountStation = oldNextPlayerBalance;
+                        }
+                        playersBalance.put(nextPlayerName, oldNextPlayerBalance.subtract(rentAmountStation));
+                        playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(rentAmountStation));
+                        break;
+
+                    case COMPANY:
+                        if (Objects.equals(nextPlayerLocation.getOwner(), board.get(12).getOwner()) && Objects.equals(nextPlayerLocation.getOwner(), board.get(28).getOwner())){
+                            BigDecimal rentAmountCompanyOwnerOwnTwo = BigDecimal.valueOf(10L * dicesResult);
+                            if (oldNextPlayerBalance.compareTo(rentAmountCompanyOwnerOwnTwo) < 0){
+                                rentAmountCompanyOwnerOwnTwo = oldNextPlayerBalance;
+                            }
+                            playersBalance.put(nextPlayerName, oldNextPlayerBalance.subtract(rentAmountCompanyOwnerOwnTwo));
+                            playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(rentAmountCompanyOwnerOwnTwo));
+                        } else {
+                            BigDecimal rentAmountCompanyOwnerOwnOne = BigDecimal.valueOf(4L * dicesResult);
+                            if (oldNextPlayerBalance.compareTo(rentAmountCompanyOwnerOwnOne) < 0){
+                                rentAmountCompanyOwnerOwnOne = oldNextPlayerBalance;
+                            }
+                            playersBalance.put(nextPlayerName, oldNextPlayerBalance.subtract(rentAmountCompanyOwnerOwnOne));
+                            playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(rentAmountCompanyOwnerOwnOne));
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (playersBalance.get(nextPlayerName).compareTo(nullValue) <= 0){
+                    playersBalance.remove(nextPlayerName);
+                    playersLocation.remove(nextPlayerName);
+                }
             }
-
+        }
+        if (playersBalance.size() < 2) {
+            throw new GameFinishedException();
         }
     }
 
