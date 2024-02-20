@@ -7,7 +7,7 @@ public class LocationImplement implements Location {
     private final LocationKind kind;
     private final  String color;
     private final int price;
-    private final String owner;
+    private String owner;
     private final int bare;
 
     public LocationImplement(String name, LocationKind kind, String color, int price, int bare) {
@@ -34,15 +34,23 @@ public class LocationImplement implements Location {
         return owner;
     }
 
+    @Override
     public String getColor(){
         return color;
     }
 
+    @Override
     public int getPrice(){
         return price;
     }
 
+    @Override
     public int getBare(){
         return bare;
+    }
+
+    @Override
+    public void setOwner(String playerName){
+        owner = playerName;
     }
 }

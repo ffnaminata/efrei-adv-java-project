@@ -5,11 +5,7 @@ import fr.arsenelapostolet.efrei.monopoly.Monopoly;
 import fr.arsenelapostolet.efrei.monopoly.OrderKind;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-
+import java.util.*;
 
 
 public class MonopolyImplement implements Monopoly {
@@ -19,7 +15,7 @@ public class MonopolyImplement implements Monopoly {
     private final Map<String, Location> playersLocation;
     private  Map<String, BigDecimal> playersBalance;
     private int currentPlayerIndex;
-    private boolean firstOrderSubmitted;
+    //private boolean firstOrderSubmitted;
 
 
     public MonopolyImplement(Dices dices, List<String> playersName) {
@@ -29,34 +25,25 @@ public class MonopolyImplement implements Monopoly {
         this.playersLocation = new HashMap<>();
         this.playersBalance = new HashMap<>();
         this.currentPlayerIndex = 0;
-        Parser.parseCSV(this.board);
+        Parser.parseCSV2(this.board);
         initialisePlayersPosition();
-        initalisePlayersBalance();
-        firstOrderSubmitted(playersName.get(this.currentPlayerIndex), OrderKind.IDLE);
+        initialisePlayersBalance();
+        submitOrder(playersName.get(playersName.size() - 1), OrderKind.IDLE);
+        //firstOrderSubmitted(playersName.get(this.currentPlayerIndex), OrderKind.IDLE);
         }
 
-
-
-    // Initialiser la position de chaque joueur
     public void initialisePlayersPosition(){
         for (String playerName : this.playersName) {
-            // Initialiser la position du joueur au début du plateau
-            Location playerLocation = this.board.get(0); // Position de départ
+            Location playerLocation = this.board.get(0);
             this.playersLocation.put(playerName, playerLocation);
         }
     }
 
-    // Initialiser la balance de chaques joueur
-    private void initalisePlayersBalance(){
+    private void initialisePlayersBalance(){
         BigDecimal playerBalance = new BigDecimal("1500");
         for (String playerName : this.playersName) {
             this.playersBalance.put(playerName, playerBalance);
         }
-    }
-
-
-    public List<Location> getBoard() {
-        return board;
     }
 
     public void firstOrderSubmitted (String playerName, OrderKind order){
@@ -69,24 +56,58 @@ public class MonopolyImplement implements Monopoly {
     }
     @Override
     public void submitOrder(String playerName, OrderKind order) {
-        int nextPlayerIndex = (currentPlayerIndex + 1) % playersName.size();
-            if(!playersName.get(this.currentPlayerIndex).equals(playerName)){
-                //
+        int currentPlayerIndex = playersName.indexOf(playerName);
+        Location currentPlayerLocation = playersLocation.get(playerName);
+
+        if (order == OrderKind.BUY && Objects.equals(currentPlayerLocation.getOwner(), "")){
+            if (currentPlayerLocation.getKind() == Location.LocationKind.PROPERTY ||
+                    currentPlayerLocation.getKind() == Location.LocationKind.STATION ||
+                    currentPlayerLocation.getKind() == Location.LocationKind.COMPANY ){
+                playersBalance.put(playerName, playersBalance.get(playerName).subtract(BigDecimal.valueOf(currentPlayerLocation.getPrice())));
+                currentPlayerLocation.setOwner(playerName);
             }
-            else {
-                playerName= playersName.get(nextPlayerIndex);//FaireAvancer le joueur suivant
-                Location currentLocation = playersLocation.get(playerName);
-                int IndexOfCurrentLocation = this.board.indexOf(currentLocation);
+        }
 
-                if (order == OrderKind.IDLE) {
-                        int nextLocationIndex = (IndexOfCurrentLocation + this.dices.throwTwoSixSidedDices()) %board.size();
-                        playersLocation.put(playerName, board.get(nextLocationIndex));
-                    }
+        int nextPlayerIndex = (currentPlayerIndex + 1) % playersName.size();
+        String nextPlayerName = playersName.get(nextPlayerIndex);
+        Location nextPlayerLocation = playersLocation.get(nextPlayerName);
 
-                currentPlayerIndex = nextPlayerIndex ;
-                }
+        if (this.currentPlayerIndex == nextPlayerIndex){
+            int IndexOfNextPlayerLocation = this.board.indexOf(nextPlayerLocation);
+
+            int newNextPlayerLocationIndex = (IndexOfNextPlayerLocation + this.dices.throwTwoSixSidedDices()) % board.size();
+            playersLocation.put(nextPlayerName, board.get(newNextPlayerLocationIndex));
+            nextPlayerLocation = playersLocation.get(nextPlayerName);
+
+            this.currentPlayerIndex = (nextPlayerIndex + 1) % playersName.size();
+        }
+
+        String s = nextPlayerLocation.getOwner();
+        Boolean b = nextPlayerLocation.getOwner().isEmpty();
+        if (!nextPlayerLocation.getOwner().isEmpty()){
+            switch (nextPlayerLocation.getKind()){
+                case PROPERTY :
+                    BigDecimal oldNextPlayerBalance = playersBalance.get(nextPlayerName);
+                    playersBalance.put(nextPlayerName, oldNextPlayerBalance.subtract(BigDecimal.valueOf(nextPlayerLocation.getBare())));
+                    playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(BigDecimal.valueOf(nextPlayerLocation.getBare())));
+                    break;
+                case STATION :
+                    playersBalance.put(nextPlayerName, playersBalance.get(nextPlayerName).subtract(BigDecimal.valueOf(25)));
+                    playersBalance.put(nextPlayerLocation.getOwner(), playersBalance.get(nextPlayerLocation.getOwner()).add(BigDecimal.valueOf(25)));
+                    break;
+                case COMPANY:
+
+                    break;
+                default:
+                    break;
+            }
+
+        }
     }
 
+    public List<Location> getBoard() {
+        return board;
+    }
     @Override
     public Map<String, Location> getPlayersLocation() {
         return  new HashMap<>(playersLocation);
@@ -96,4 +117,5 @@ public class MonopolyImplement implements Monopoly {
     public Map<String, BigDecimal> getPlayersBalance() {
         return playersBalance;
     }
+
 }

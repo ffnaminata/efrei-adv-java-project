@@ -7,8 +7,13 @@ public interface Location {
     LocationKind getKind();
 
     String getOwner();
+    String getColor();
 
     int getBare();
+
+    int getPrice();
+
+    void setOwner(String playerName);
 
     enum LocationKind {
         START,
