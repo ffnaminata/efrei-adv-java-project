@@ -53,6 +53,10 @@ public class MonopolyImplement implements Monopoly {
     }
     @Override
     public void submitOrder(String playerName, OrderKind order) {
+        if (playersBalance.size() < 2) {
+            throw new GameFinishedException();
+        }
+
         int currentPlayerIndex = playersName.indexOf(playerName);
         Location currentPlayerLocation = playersLocation.get(playerName);
 
@@ -133,9 +137,6 @@ public class MonopolyImplement implements Monopoly {
                     playersLocation.remove(nextPlayerName);
                 }
             }
-        }
-        if (playersBalance.size() < 2) {
-            throw new GameFinishedException();
         }
     }
 
