@@ -1,0 +1,17 @@
+package fr.diopfofana.efrei.monopoly.simulation;
+
+import fr.arsenelapostolet.efrei.monopoly.Location;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+public class LocationStation extends LocationImplement{
+    public LocationStation(String name, Location.LocationKind kind, String color, int price, int bare) {
+        super(name, kind, color, price, bare);
+    }
+
+    @Override
+    public BigDecimal getRent(int dicesResult, List<Location> board){
+        return BigDecimal.valueOf(25);
+    }
+}

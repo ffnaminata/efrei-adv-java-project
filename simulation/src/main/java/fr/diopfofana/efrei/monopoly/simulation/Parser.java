@@ -3,52 +3,66 @@ package fr.diopfofana.efrei.monopoly.simulation;
 import fr.arsenelapostolet.efrei.monopoly.Location;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class Parser {
-    public static void parseCSV(List<Location> board) {
-        String filePath1 = "/monopoly.csv";
-        String filePath2 = "/rent.csv";
+    public static void loadMonopolyDataFromCSV(List<Location> board) {
+        String monopolyFilePath = "/monopoly.csv";
+        String rentFilePath = "/rent.csv";
 
         try (
-                InputStream inputStream1 = Parser.class.getResourceAsStream(filePath1);
-                BufferedReader reader1 = new BufferedReader(new InputStreamReader(inputStream1));
+                InputStream monopolyStream = Parser.class.getResourceAsStream(monopolyFilePath);
+                BufferedReader monopolyReader = (monopolyStream != null) ? new BufferedReader(new InputStreamReader(monopolyStream)) : null;
 
-                InputStream inputStream2 = Parser.class.getResourceAsStream(filePath2);
-                BufferedReader reader2 = new BufferedReader(new InputStreamReader(inputStream2))
+                InputStream rentStream = Parser.class.getResourceAsStream(rentFilePath);
+                BufferedReader rentReader = (rentStream != null) ? new BufferedReader(new InputStreamReader(rentStream)) : null
         ) {
-            reader1.readLine();
-            reader2.readLine();
+            if (monopolyReader == null || rentReader == null) {
+                throw new RuntimeException("Error while reading CSV files: Unable to open the files.");
+            }
 
-            String line1, line2;
-            while ((line1 = reader1.readLine()) != null) {
-                String[] parts1 = line1.split(",");
+            monopolyReader.readLine();
+            rentReader.readLine();
 
-                if (parts1.length > 1) {
-                    String name = parts1[0].trim();
-                    Location.LocationKind kind = Location.LocationKind.valueOf(parts1[1].trim().toUpperCase());
-                    String color = parts1.length > 2 ? parts1[2].trim() : "";
-                    int price = parts1.length > 3 ? Integer.parseInt(parts1[3].trim()) : 0;
-                    int bare = 0;
-
-                    if (kind == Location.LocationKind.PROPERTY) {
-                        line2 = reader2.readLine();
-                        if (line2 != null) {
-                            String[] parts2 = line2.split(",");
-                            bare = parts2.length > 7 ? Integer.parseInt(parts2[7].trim()) : 0;
-                        }
-                    }
-
-                    LocationImplement location = new LocationImplement(name, kind, color, price, bare);
-                    board.add(location);
-                }
+            String line1;
+            while ((line1 = monopolyReader.readLine()) != null) {
+                processMonopolyCSVLine(line1, rentReader, board);
             }
 
         } catch (IOException | NumberFormatException e) {
-            throw new RuntimeException("Erreur lors de la lecture des fichiers CSV : " + e.getMessage(), e);
+            throw new RuntimeException("Error while reading CSV files: " + e.getMessage(), e);
         }
+    }
+
+    private static void processMonopolyCSVLine(String line1, BufferedReader reader2, List<Location> board) throws IOException, NumberFormatException {
+        String[] parts1 = line1.split(",");
+        if (parts1.length > 1) {
+            String name = parts1[0].trim();
+            Location.LocationKind kind = Location.LocationKind.valueOf(parts1[1].trim().toUpperCase());
+            String color = parts1.length > 2 ? parts1[2].trim() : "";
+            int price = parts1.length > 3 ? Integer.parseInt(parts1[3].trim()) : 0;
+            int bare = (kind == Location.LocationKind.PROPERTY) ? readBareFromRentFile(reader2) : 0;
+
+            Location location = createLocation(name, kind, color, price, bare);
+            board.add(location);
+        }
+    }
+
+    private static int readBareFromRentFile(BufferedReader reader) throws IOException, NumberFormatException {
+        String line = reader.readLine();
+        String[] parts = (line != null) ? line.split(",") : new String[0];
+        return (parts.length > 7) ? Integer.parseInt(parts[7].trim()) : 0;
+    }
+
+    private static Location createLocation(String name, Location.LocationKind kind, String color, int price, int bare) {
+        Location location;
+        switch (kind) {
+            case COMPANY -> location = new LocationCompany(name, kind, color, price, bare);
+            case PROPERTY -> location = new LocationProperty(name, kind, color, price, bare);
+            case STATION -> location = new LocationStation(name, kind, color, price, bare);
+            default -> location = new LocationImplement(name, kind, color, price, bare);
+        }
+        return location;
     }
 }

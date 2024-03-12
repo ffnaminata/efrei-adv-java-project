@@ -2,6 +2,9 @@ package fr.diopfofana.efrei.monopoly.simulation;
 
 import fr.arsenelapostolet.efrei.monopoly.Location;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 public class LocationImplement implements Location {
     private final String name;
     private final LocationKind kind;
@@ -53,4 +56,10 @@ public class LocationImplement implements Location {
     public void setOwner(String playerName){
         owner = playerName;
     }
+
+    @Override
+    public BigDecimal getRent(int dicesResult, List<Location> board){
+        return new BigDecimal(0);
+    }
+
 }

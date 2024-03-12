@@ -1,5 +1,8 @@
 package fr.arsenelapostolet.efrei.monopoly;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 public interface Location {
 
     String getName();
@@ -14,6 +17,8 @@ public interface Location {
     int getPrice();
 
     void setOwner(String playerName);
+
+    BigDecimal getRent(int dicesResult, List<Location> board);
 
     enum LocationKind {
         START,
