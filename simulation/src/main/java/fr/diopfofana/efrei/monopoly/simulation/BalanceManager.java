@@ -46,7 +46,7 @@ public class BalanceManager {
         playersBalance.put(playerName, playerBalance.add(amount));
     }
 
-    public void remove(String playerName){
+    public void removePlayerFromPlayersBalance(String playerName){
         playersBalance.remove(playerName);
     }
 }

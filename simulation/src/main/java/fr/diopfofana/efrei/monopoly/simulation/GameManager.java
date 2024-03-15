@@ -14,7 +14,7 @@ public class GameManager {
 
     public void removePlayer(String playerToRemove, Map<String, Location> playersLocation, BalanceManager balanceManager){
         playersLocation.remove(playerToRemove);
-        balanceManager.remove(playerToRemove);
+        balanceManager.removePlayerFromPlayersBalance(playerToRemove);
     }
 }
 
