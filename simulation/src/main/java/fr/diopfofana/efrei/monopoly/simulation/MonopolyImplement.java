@@ -1,5 +1,8 @@
 package fr.diopfofana.efrei.monopoly.simulation;
 import fr.arsenelapostolet.efrei.monopoly.*;
+import fr.diopfofana.efrei.monopoly.simulation.Managers.BalanceManager;
+import fr.diopfofana.efrei.monopoly.simulation.Managers.GameManager;
+import fr.diopfofana.efrei.monopoly.simulation.Managers.OrderManager;
 
 import java.math.BigDecimal;
 import java.util.*;

@@ -1,4 +1,4 @@
-package fr.diopfofana.efrei.monopoly.simulation;
+package fr.diopfofana.efrei.monopoly.simulation.Locations;
 
 import fr.arsenelapostolet.efrei.monopoly.Location;
 

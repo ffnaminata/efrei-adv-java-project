@@ -1,6 +1,7 @@
-package fr.diopfofana.efrei.monopoly.simulation;
+package fr.diopfofana.efrei.monopoly.simulation.Managers;
 
 import fr.arsenelapostolet.efrei.monopoly.Location;
+import fr.diopfofana.efrei.monopoly.simulation.Managers.BalanceManager;
 
 import java.math.BigDecimal;
 import java.util.List;

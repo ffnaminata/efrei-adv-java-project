@@ -1,6 +1,10 @@
 package fr.diopfofana.efrei.monopoly.simulation;
 
 import fr.arsenelapostolet.efrei.monopoly.Location;
+import fr.diopfofana.efrei.monopoly.simulation.Locations.LocationCompany;
+import fr.diopfofana.efrei.monopoly.simulation.Locations.LocationImplement;
+import fr.diopfofana.efrei.monopoly.simulation.Locations.LocationProperty;
+import fr.diopfofana.efrei.monopoly.simulation.Locations.LocationStation;
 
 import java.io.*;
 import java.util.ArrayList;

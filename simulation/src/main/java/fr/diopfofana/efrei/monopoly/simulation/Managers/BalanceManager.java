@@ -1,4 +1,4 @@
-package fr.diopfofana.efrei.monopoly.simulation;
+package fr.diopfofana.efrei.monopoly.simulation.Managers;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
