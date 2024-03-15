@@ -10,34 +10,31 @@ public class MonopolyImplement implements Monopoly {
     private final List<Location> board;
     private final List<String> playersName;
     private final Map<String, Location> playersLocation;
-    private final Map<String, BigDecimal> playersBalance;
+    private final BalanceManager balanceManager;
+    private final OrderManager orderManager;
+    private final GameManager gameManager;
     private int currentPlayerIndex;
 
 
     public MonopolyImplement(Dices dices, List<String> playersName) {
+        Parser parser = new Parser();
         this.dices = dices;
-        this.board = new ArrayList<>();
+        this.board = parser.loadMonopolyDataFromCSV();
         this.playersName = playersName;
-        this.playersLocation = new HashMap<>();
-        this.playersBalance = new HashMap<>();
+        this.playersLocation = initialisePlayersPosition();
+        this.balanceManager = new BalanceManager(playersName);
+        this.orderManager = new OrderManager();
+        this.gameManager = new GameManager();
         this.currentPlayerIndex = playersName.size() - 1;
-        Parser.loadMonopolyDataFromCSV(this.board);
-        initialisePlayersPosition();
-        initialisePlayersBalance();
         submitOrder(playersName.get(this.currentPlayerIndex), OrderKind.IDLE);
-        }
-
-    private void initialisePlayersPosition(){
-        for (String playerName : this.playersName) {
-            this.playersLocation.put(playerName, this.board.get(0));
-        }
     }
 
-    private void initialisePlayersBalance(){
-        BigDecimal playerBalance = new BigDecimal("1500");
+    private Map<String, Location> initialisePlayersPosition(){
+        Map<String, Location> playersLocation = new HashMap<>();
         for (String playerName : this.playersName) {
-            this.playersBalance.put(playerName, playerBalance);
+            playersLocation.put(playerName, this.board.get(0));
         }
+        return playersLocation;
     }
 
     public List<Location> getBoard() {
@@ -50,12 +47,12 @@ public class MonopolyImplement implements Monopoly {
 
     @Override
     public Map<String, BigDecimal> getPlayersBalance() {
-        return playersBalance;
+        return balanceManager.getPlayersBalance();
     }
 
     @Override
     public void submitOrder(String playerName, OrderKind order) {
-        GameManager.throwExceptionIfGameFinished(playersLocation);
+        gameManager.throwExceptionIfGameFinished(playersLocation);
 
         // Verification que le joueur est bien celui qui doit jouer
         int currentPlayerIndex = playersName.indexOf(playerName);
@@ -66,7 +63,7 @@ public class MonopolyImplement implements Monopoly {
         // Ordre d'acheter la case ou le joueur se trouve
         Location currentPlayerLocation = playersLocation.get(playerName);
         if (order == OrderKind.BUY){
-            OrderManager.buy(playerName, currentPlayerLocation, playersBalance);
+            orderManager.buy(playerName, currentPlayerLocation, balanceManager);
         }
 
         // Recuperer l'index et le nom du prochain joueur
@@ -75,23 +72,24 @@ public class MonopolyImplement implements Monopoly {
 
         // Ordre de faire avancer le prochain joueur
         int dicesResult = dices.throwTwoSixSidedDices();
-        OrderManager.idle(dicesResult, nextPlayerName, playersLocation, board);
+        orderManager.idle(dicesResult, nextPlayerName, playersLocation, board);
 
         // Payement de loyer si besoin
         Location nextPlayerLocation = playersLocation.get(nextPlayerName);
         if (!nextPlayerLocation.getOwner().isEmpty()){
-            BigDecimal nextPlayerBalance = playersBalance.get(nextPlayerName);
+            BigDecimal nextPlayerBalance = balanceManager.getPlayerBalance(nextPlayerName);
             BigDecimal rentAmount = nextPlayerLocation.getRent(dicesResult, board);
-            if (!BalanceManager.canAfford(rentAmount, nextPlayerName, playersBalance)){
+            if (!balanceManager.canAfford(rentAmount, nextPlayerName)){
                 rentAmount = nextPlayerBalance;
-                GameManager.removePlayer(nextPlayerName, playersLocation, playersBalance);
+                gameManager.removePlayer(nextPlayerName, playersLocation, balanceManager);
             } else {
-                BalanceManager.toDebit(rentAmount, nextPlayerName, playersBalance);
+                balanceManager.toDebit(rentAmount, nextPlayerName);
             }
-            BalanceManager.toCredit(rentAmount, nextPlayerLocation.getOwner(), playersBalance);
+            balanceManager.toCredit(rentAmount, nextPlayerLocation.getOwner());
         }
 
         // Mise a jour du current player
         this.currentPlayerIndex = nextPlayerIndex;
     }
 }
+

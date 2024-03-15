@@ -3,11 +3,14 @@ package fr.diopfofana.efrei.monopoly.simulation;
 import fr.arsenelapostolet.efrei.monopoly.Location;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class Parser {
-    public static void loadMonopolyDataFromCSV(List<Location> board) {
+    public List<Location> loadMonopolyDataFromCSV() {
+        List<Location> board = new ArrayList<>();
+
         String monopolyFilePath = "/monopoly.csv";
         String rentFilePath = "/rent.csv";
 
@@ -33,6 +36,7 @@ public class Parser {
         } catch (IOException | NumberFormatException e) {
             throw new RuntimeException("Error while reading CSV files: " + e.getMessage(), e);
         }
+        return board;
     }
 
     private static void processMonopolyCSVLine(String line1, BufferedReader reader2, List<Location> board) throws IOException, NumberFormatException {
@@ -66,3 +70,4 @@ public class Parser {
         return location;
     }
 }
+
