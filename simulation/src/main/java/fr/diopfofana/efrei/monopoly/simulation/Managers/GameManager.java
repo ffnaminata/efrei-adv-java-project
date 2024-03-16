@@ -2,10 +2,10 @@ package fr.diopfofana.efrei.monopoly.simulation.Managers;
 
 import fr.arsenelapostolet.efrei.monopoly.GameFinishedException;
 import fr.arsenelapostolet.efrei.monopoly.Location;
+import fr.diopfofana.efrei.monopoly.simulation.Players;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 public class GameManager {
     public void throwExceptionIfGameFinished(PositionManager positionManager){
@@ -23,6 +23,42 @@ public class GameManager {
         int currentPlayerIndex = playersName.indexOf(playerName);
         int nextPlayerIndex = (currentPlayerIndex + 1) % playersName.size();
         return playersName.get(nextPlayerIndex);
+    }
+
+    public void checkIfGoToJailAndGo(String playerName, Players players, PositionManager positionManager, List<Location> board){
+        Location playerLocation = positionManager.getPlayerLocation(playerName);
+        if (playerLocation.getKind() == Location.LocationKind.GO_TO_JAIL){
+            positionManager.setPlayerLocation(playerName, board.get(10));
+            players.setPlayerIsInJail(playerName, true);
+        }
+    }
+
+    public void updateRoundsInJail(String playerName, Players players){
+        if (players.getPlayerIsInJail(playerName)) {
+            players.setPlayerRoundsInJail(playerName, players.getPlayerRoundsInJail(playerName) + 1);
+        }
+    }
+
+    public void checkIfThirdRoundInJailAndPay(String playerName, Players players, OrderManager orderManager, PositionManager positionManager, BalanceManager balanceManager, GameManager gameManager, int dicesResult, List<Location> board){
+        if (players.getPlayerRoundsInJail(playerName) == 2){
+            orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
+        }
+    }
+
+    public void checkIfRentToPayAndPay(String playerName, Players players, int dicesResult, PositionManager positionManager, BalanceManager balanceManager, GameManager gameManager, List<Location> board){
+        Location playerLocation = positionManager.getPlayerLocation(playerName);
+        if (!playerLocation.getOwner().isEmpty()){
+            BigDecimal playerBalance = balanceManager.getPlayerBalance(playerName);
+            int numberOfStationOwnedByLocationOwner = players.getPlayersNumberOfStationOwned(playerLocation.getOwner());
+            BigDecimal rentAmount = playerLocation.getRent(dicesResult, numberOfStationOwnedByLocationOwner, board);
+            if (!balanceManager.canAfford(rentAmount, playerName)){
+                rentAmount = playerBalance;
+                gameManager.removePlayer(playerName, positionManager, balanceManager);
+            } else {
+                balanceManager.toDebit(playerName, rentAmount, gameManager, positionManager);
+            }
+            balanceManager.toCredit(playerLocation.getOwner(), rentAmount);
+        }
     }
 
     public void checkIfPassByStartAndGain(String playerName, int tempPlayerNewLocationIndex, BalanceManager balanceManager){

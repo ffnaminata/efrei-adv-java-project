@@ -49,74 +49,31 @@ public class MonopolyImplement implements Monopoly {
 
     @Override
     public void submitOrder(String playerName, OrderKind order) {
+        // Verification condition fin de jeu
         gameManager.throwExceptionIfGameFinished(positionManager);
 
         // Verification que le joueur est bien celui qui doit jouer
-        if (!Objects.equals(this.currentPlayer, playerName)){
-            return;
-        }
+        if (!this.currentPlayer.equals(playerName)){ return; }
 
-        // Ordre
-        if (order == OrderKind.BUY){
-            orderManager.buy(playerName, players, positionManager, balanceManager, gameManager);
-        }
-        else if (order == OrderKind.PAY_PRISON){
-            orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
+        // Applisquer l'ordre au joueur actuelle
+        switch (order){
+            case BUY -> orderManager.buy(playerName, players, positionManager, balanceManager, gameManager);
+            case PAY_PRISON -> orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
         }
 
         // Faire avancer le prochain joueur
         dicesResult = dices.throwTwoSixSidedDices();
         orderManager.idle(dicesResult, playerName, players, gameManager, positionManager, balanceManager, board);
 
-        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // Application des consequences
         String nextPlayerName = gameManager.getNextPlayerName(playerName, players.getPlayersName());
-
-        // Aller en prison si besoin
-        checkIfGoToJailAndGo(nextPlayerName);
-
-        // updateRoundsInJail
-        if (players.getPlayerIsInJail(nextPlayerName)){
-            players.setPlayerRoundsInJail(nextPlayerName, players.getPlayerRoundsInJail(nextPlayerName) + 1);
-        }
-
-        // checkIfThirdRoundInJailAndPay
-        if (isThirdRoundInJailAndPay(nextPlayerName)){
-            orderManager.pay_prison(nextPlayerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
-        }
-
-        // Payement de loyer si besoin
-        checkIfRentToPayAndPay(nextPlayerName, dicesResult);
+        gameManager.checkIfGoToJailAndGo(nextPlayerName, players, positionManager, board);
+        gameManager.updateRoundsInJail(nextPlayerName, players);
+        gameManager.checkIfThirdRoundInJailAndPay(nextPlayerName, players, orderManager, positionManager, balanceManager, gameManager,  dicesResult, board);
+        gameManager.checkIfRentToPayAndPay(nextPlayerName, players, dicesResult, positionManager, balanceManager, gameManager, board);
 
         // Mise a jour du current player
         this.currentPlayer = nextPlayerName;
-    }
-
-    private void checkIfRentToPayAndPay(String playerName, int dicesResult){
-        Location playerLocation = positionManager.getPlayerLocation(playerName);
-        //int numberOfStationOwnedByLocationOwner = players.getPlayersNumberOfStationOwned(playerLocation.getOwner());
-        if (!playerLocation.getOwner().isEmpty()){
-            BigDecimal playerBalance = balanceManager.getPlayerBalance(playerName);
-            int numberOfStationOwnedByLocationOwner = players.getPlayersNumberOfStationOwned(playerLocation.getOwner());
-            BigDecimal rentAmount = playerLocation.getRent(dicesResult, numberOfStationOwnedByLocationOwner, board);
-            if (!balanceManager.canAfford(rentAmount, playerName)){
-                rentAmount = playerBalance;
-                gameManager.removePlayer(playerName, positionManager, balanceManager);
-            } else {
-                balanceManager.toDebit(playerName, rentAmount, gameManager, positionManager);
-            }
-            balanceManager.toCredit(playerLocation.getOwner(), rentAmount);
-        }
-    }
-    private void checkIfGoToJailAndGo(String playerName){
-        Location playerLocation = positionManager.getPlayerLocation(playerName);
-        if (playerLocation.getKind() == Location.LocationKind.GO_TO_JAIL){
-            positionManager.setPlayerLocation(playerName, board.get(10));
-            players.setPlayerIsInJail(playerName, true);
-        }
-    }
-
-    private boolean isThirdRoundInJailAndPay(String playerName){
-        return players.getPlayerRoundsInJail(playerName) == 2;
     }
 }
 
