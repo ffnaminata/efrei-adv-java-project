@@ -11,7 +11,7 @@ public class LocationStation extends LocationImplement{
     }
 
     @Override
-    public BigDecimal getRent(int dicesResult, List<Location> board){
-        return BigDecimal.valueOf(25);
+    public BigDecimal getRent(int dicesResult, int numberOfStationOwned, List<Location> board){
+        return new BigDecimal("25").multiply(new BigDecimal("2").pow(numberOfStationOwned - 1));
     }
 }

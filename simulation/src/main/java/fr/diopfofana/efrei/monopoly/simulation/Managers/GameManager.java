@@ -3,6 +3,7 @@ package fr.diopfofana.efrei.monopoly.simulation.Managers;
 import fr.arsenelapostolet.efrei.monopoly.GameFinishedException;
 import fr.arsenelapostolet.efrei.monopoly.Location;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,14 @@ public class GameManager {
         int currentPlayerIndex = playersName.indexOf(playerName);
         int nextPlayerIndex = (currentPlayerIndex + 1) % playersName.size();
         return playersName.get(nextPlayerIndex);
+    }
+
+    public void checkIfPassByStartAndGain(String playerName, int tempPlayerNewLocationIndex, BalanceManager balanceManager){
+        int startPassCount = tempPlayerNewLocationIndex / 40;
+        if (startPassCount > 0){
+            BigDecimal gain = new BigDecimal(200 * startPassCount);
+            balanceManager.toCredit(playerName, gain);
+        }
     }
 }
 

@@ -58,7 +58,7 @@ public class LocationImplement implements Location {
     }
 
     @Override
-    public BigDecimal getRent(int dicesResult, List<Location> board){
+    public BigDecimal getRent(int dicesResult, int numberOfStationOwned, List<Location> board){
         return new BigDecimal(0);
     }
 

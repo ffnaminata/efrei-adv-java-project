@@ -34,12 +34,14 @@ public class PositionManager {
         playersLocation.put(playerName, playerLocation);
     }
 
-    public void toMove(int dicesResult, String playerName, Players players, List<Location> board){
+    public void toMove(int dicesResult, String playerName, Players players, GameManager gameManager, BalanceManager balanceManager, List<Location> board){
         if (!players.getPlayerIsInJail(playerName)){
             Location playerLocation = playersLocation.get(playerName);
             int playerLocationIndex = board.indexOf(playerLocation);
-            int  newPlayerLocationIndex = (playerLocationIndex + dicesResult) % board.size();
-            playersLocation.put(playerName, board.get(newPlayerLocationIndex));
+            int tempPlayerNewLocationIndex = playerLocationIndex + dicesResult;
+            gameManager.checkIfPassByStartAndGain(playerName, tempPlayerNewLocationIndex, balanceManager);
+            int playerNewLocationIndex = tempPlayerNewLocationIndex % board.size();
+            playersLocation.put(playerName, board.get(playerNewLocationIndex));
         }
     }
 

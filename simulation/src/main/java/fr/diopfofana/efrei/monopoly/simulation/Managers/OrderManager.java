@@ -9,22 +9,26 @@ import java.util.List;
 import java.util.Objects;
 
 import static fr.arsenelapostolet.efrei.monopoly.Location.LocationKind.JAIL;
+import static fr.arsenelapostolet.efrei.monopoly.Location.LocationKind.STATION;
 
 public class OrderManager {
-    public void idle(int dicesResult, String playerName, Players players, GameManager gameManager, PositionManager positionManager, List<Location> board){
+    public void idle(int dicesResult, String playerName, Players players, GameManager gameManager, PositionManager positionManager, BalanceManager balanceManager, List<Location> board){
         String nextPlayerName = gameManager.getNextPlayerName(playerName, players.getPlayersName());
-        positionManager.toMove(dicesResult, nextPlayerName, players, board);
+        positionManager.toMove(dicesResult, nextPlayerName, players, gameManager, balanceManager, board);
     }
 
-    public void buy(String playerName, PositionManager positionManager, BalanceManager balanceManager, GameManager gameManager){
+    public void buy(String playerName, Players players, PositionManager positionManager, BalanceManager balanceManager, GameManager gameManager){
         Location playerLocation = positionManager.getPlayerLocation(playerName);
         BigDecimal amount = BigDecimal.valueOf(playerLocation.getPrice());
         if (Objects.equals(playerLocation.getOwner(), "") && balanceManager.canAfford(amount, playerName)){
             if (playerLocation.getKind() == Location.LocationKind.PROPERTY ||
                     playerLocation.getKind() == Location.LocationKind.STATION ||
                     playerLocation.getKind() == Location.LocationKind.COMPANY ){
-                balanceManager.toDebit(amount, playerName, gameManager, positionManager);
+                balanceManager.toDebit(playerName, amount, gameManager, positionManager);
                 playerLocation.setOwner(playerName);
+                if (playerLocation.getKind() == STATION){
+                    players.setPlayersNumberOfStationOwned( playerName, players.getPlayersNumberOfStationOwned(playerName) + 1);
+                }
             }
         }
     }
@@ -32,10 +36,10 @@ public class OrderManager {
     public void pay_prison(String playerName, Players players, PositionManager positionManager , BalanceManager balanceManager, GameManager gameManager, int dicesResult, List<Location> board){
         if (players.getPlayerRoundsInJail(playerName) > 0 ){
             BigDecimal amount = BigDecimal.valueOf(50);
-            balanceManager.toDebit(amount, playerName, gameManager, positionManager);
+            balanceManager.toDebit(playerName, amount, gameManager, positionManager);
             players.setPlayerIsInJail(playerName, false);
             players.setPlayerRoundsInJail(playerName, 0);
-            positionManager.toMove(dicesResult, playerName, players, board);
+            positionManager.toMove(dicesResult, playerName, players, gameManager, balanceManager, board);
         }
     }
 }

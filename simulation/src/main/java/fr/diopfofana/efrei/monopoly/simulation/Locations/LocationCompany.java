@@ -12,7 +12,7 @@ public class LocationCompany extends LocationImplement {
     }
 
     @Override
-    public BigDecimal getRent(int dicesResult, List<Location> board){
+    public BigDecimal getRent(int dicesResult, int numberOfStationOwned, List<Location> board){
         if (Objects.equals(board.get(12).getOwner(), board.get(28).getOwner())){
             return new BigDecimal(10 * dicesResult);
         } else {

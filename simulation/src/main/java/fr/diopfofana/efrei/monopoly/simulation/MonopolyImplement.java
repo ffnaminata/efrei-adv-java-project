@@ -58,7 +58,7 @@ public class MonopolyImplement implements Monopoly {
 
         // Ordre
         if (order == OrderKind.BUY){
-            orderManager.buy(playerName, positionManager, balanceManager, gameManager);
+            orderManager.buy(playerName, players, positionManager, balanceManager, gameManager);
         }
         else if (order == OrderKind.PAY_PRISON){
             orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
@@ -66,7 +66,7 @@ public class MonopolyImplement implements Monopoly {
 
         // Faire avancer le prochain joueur
         dicesResult = dices.throwTwoSixSidedDices();
-        orderManager.idle(dicesResult, playerName, players, gameManager, positionManager, board);
+        orderManager.idle(dicesResult, playerName, players, gameManager, positionManager, balanceManager, board);
 
         // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         String nextPlayerName = gameManager.getNextPlayerName(playerName, players.getPlayersName());
@@ -74,11 +74,12 @@ public class MonopolyImplement implements Monopoly {
         // Aller en prison si besoin
         checkIfGoToJailAndGo(nextPlayerName);
 
-        // Update tours en prison
+        // updateRoundsInJail
         if (players.getPlayerIsInJail(nextPlayerName)){
             players.setPlayerRoundsInJail(nextPlayerName, players.getPlayerRoundsInJail(nextPlayerName) + 1);
         }
 
+        // checkIfThirdRoundInJailAndPay
         if (isThirdRoundInJailAndPay(nextPlayerName)){
             orderManager.pay_prison(nextPlayerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
         }
@@ -92,16 +93,18 @@ public class MonopolyImplement implements Monopoly {
 
     private void checkIfRentToPayAndPay(String playerName, int dicesResult){
         Location playerLocation = positionManager.getPlayerLocation(playerName);
+        //int numberOfStationOwnedByLocationOwner = players.getPlayersNumberOfStationOwned(playerLocation.getOwner());
         if (!playerLocation.getOwner().isEmpty()){
             BigDecimal playerBalance = balanceManager.getPlayerBalance(playerName);
-            BigDecimal rentAmount = playerLocation.getRent(dicesResult, board);
+            int numberOfStationOwnedByLocationOwner = players.getPlayersNumberOfStationOwned(playerLocation.getOwner());
+            BigDecimal rentAmount = playerLocation.getRent(dicesResult, numberOfStationOwnedByLocationOwner, board);
             if (!balanceManager.canAfford(rentAmount, playerName)){
                 rentAmount = playerBalance;
                 gameManager.removePlayer(playerName, positionManager, balanceManager);
             } else {
-                balanceManager.toDebit(rentAmount, playerName, gameManager, positionManager);
+                balanceManager.toDebit(playerName, rentAmount, gameManager, positionManager);
             }
-            balanceManager.toCredit(rentAmount, playerLocation.getOwner());
+            balanceManager.toCredit(playerLocation.getOwner(), rentAmount);
         }
     }
     private void checkIfGoToJailAndGo(String playerName){

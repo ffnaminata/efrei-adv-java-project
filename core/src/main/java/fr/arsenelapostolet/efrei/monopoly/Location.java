@@ -18,7 +18,7 @@ public interface Location {
 
     void setOwner(String playerName);
 
-    BigDecimal getRent(int dicesResult, List<Location> board);
+    BigDecimal getRent(int dicesResult, int numberOfStationOwned, List<Location> board);
 
     enum LocationKind {
         START,
