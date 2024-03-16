@@ -14,7 +14,7 @@ public class Players {
         this.playersRoundsInJail = new ArrayList<>();
         for (String playerName : playersName){
             playersIsInJail.add(false);
-            playersRoundsInJail.add(0);
+            playersRoundsInJail.add(-1);
         }
     }
 

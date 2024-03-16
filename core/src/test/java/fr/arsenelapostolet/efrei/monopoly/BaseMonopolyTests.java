@@ -501,6 +501,104 @@ public abstract class BaseMonopolyTests {
         assertThat(balances.get(player2)).isEqualTo(new BigDecimal(1500 - 50));
     }
 
+    @Test
+    public void start_passByStart_Gets200() {
+        // Given
+        when(fakeDices.throwTwoSixSidedDices())
+                .thenReturn(43);
+
+        // When
+        monopoly.submitOrder(player1, OrderKind.IDLE);
+
+        final var balances = monopoly.getPlayersBalance();
+
+        // Then
+        assertThat(balances.get(player2)).isEqualTo(new BigDecimal(1700));
+
+    }
+
+    @Test
+    public void rent_stationRent_scalesWithNumberOfStationsOwned() {
+        // Given
+        when(fakeDices.throwTwoSixSidedDices())
+                .thenReturn(5) // Player 2
+                .thenReturn(3) // Player 3
+                .thenReturn(5) // Player 4
+                .thenReturn(3) // Player 1
+                .thenReturn(10) // Player 2
+                .thenReturn(3) // Player 3
+                .thenReturn(10) // Player 4
+                .thenReturn(3) // Player 1
+                .thenReturn(10) // Player 2
+                .thenReturn(3) // Player 3
+                .thenReturn(10) // Player 4
+                .thenReturn(3) // Player 1
+                .thenReturn(10) // Player 2
+                .thenReturn(3) // Player 3
+                .thenReturn(10); // Player 4
+
+        // When
+        monopoly.submitOrder(player1, OrderKind.IDLE);
+        monopoly.submitOrder(player2, OrderKind.BUY);
+
+        final var player2BalanceAfterBuyingFirstStation = monopoly.getPlayersBalance().get(player2);
+
+        monopoly.submitOrder(player3, OrderKind.IDLE);
+
+        final var player4BalanceAfterLandingOnFirstStation = monopoly.getPlayersBalance().get(player4);
+        final var player2BalanceAfterCollectingFirstStationRent = monopoly.getPlayersBalance().get(player2);
+
+        monopoly.submitOrder(player4, OrderKind.IDLE);
+        monopoly.submitOrder(player1, OrderKind.IDLE);
+        monopoly.submitOrder(player2, OrderKind.BUY);
+
+        final var player2BalanceAfterBuyingSecondStation = monopoly.getPlayersBalance().get(player2);
+
+        monopoly.submitOrder(player3, OrderKind.IDLE);
+
+        final var player4BalanceAfterLandingOnSecondStation = monopoly.getPlayersBalance().get(player4);
+        final var player2BalanceAfterCollectingSecondStationRent = monopoly.getPlayersBalance().get(player2);
+
+        monopoly.submitOrder(player4, OrderKind.IDLE);
+        monopoly.submitOrder(player1, OrderKind.IDLE);
+        monopoly.submitOrder(player2, OrderKind.BUY);
+
+        final var player2BalanceAfterBuyingThirdStation = monopoly.getPlayersBalance().get(player2);
+
+        monopoly.submitOrder(player3, OrderKind.IDLE);
+
+        final var player4BalanceAfterLandingOnThirdStation = monopoly.getPlayersBalance().get(player4);
+        final var player2BalanceAfterCollectingThirdStationRent = monopoly.getPlayersBalance().get(player2);
+
+        monopoly.submitOrder(player4, OrderKind.IDLE);
+        monopoly.submitOrder(player1, OrderKind.IDLE);
+        monopoly.submitOrder(player2, OrderKind.BUY);
+
+        final var player2BalanceAfterBuyingLastStation = monopoly.getPlayersBalance().get(player2);
+
+        monopoly.submitOrder(player3, OrderKind.IDLE);
+
+        final var player4BalanceAfterLandingOnLastStation = monopoly.getPlayersBalance().get(player4);
+        final var player2BalanceAfterCollectingLastStationRent = monopoly.getPlayersBalance().get(player2);
+
+        // Then
+        assertThat(player2BalanceAfterBuyingFirstStation).isEqualTo(new BigDecimal(1500 - 200));
+        assertThat(player4BalanceAfterLandingOnFirstStation).isEqualTo(new BigDecimal(1500 - 25));
+        assertThat(player2BalanceAfterCollectingFirstStationRent).isEqualTo(new BigDecimal(1500 - 200 + 25));
+
+        assertThat(player2BalanceAfterBuyingSecondStation).isEqualTo(new BigDecimal(1500 - (2 * 200) + 25));
+        assertThat(player4BalanceAfterLandingOnSecondStation).isEqualTo(new BigDecimal(1500 - 25 - 50));
+        assertThat(player2BalanceAfterCollectingSecondStationRent).isEqualTo(new BigDecimal(1500 - (2 * 200) + 25 + 50));
+
+        assertThat(player2BalanceAfterBuyingThirdStation).isEqualTo(new BigDecimal(1500 - (3 * 200) + 25 + 50));
+        assertThat(player4BalanceAfterLandingOnThirdStation).isEqualTo(new BigDecimal(1500 - 25 - 50 - 100));
+        assertThat(player2BalanceAfterCollectingThirdStationRent).isEqualTo(new BigDecimal(1500 - (3 * 200) + 25 + 50 + 100));
+
+        assertThat(player2BalanceAfterBuyingLastStation).isEqualTo(new BigDecimal(1500 - (4 * 200) + 25 + 50 + 100));
+        assertThat(player4BalanceAfterLandingOnLastStation).isEqualTo(new BigDecimal(1500 - 25 - 50 - 100 - 200));
+        assertThat(player2BalanceAfterCollectingLastStationRent).isEqualTo(new BigDecimal(1500 - (4 * 200) + 25 + 50 + 100 + 200));
+    }
+
     private void assertThatPlayerIsRemovedFromGame(Map<String, BigDecimal> balances, Map<String, Location> locations, String player) {
         assertThat(balances.containsKey(player)).isFalse();
         assertThat(locations.containsKey(player)).isFalse();

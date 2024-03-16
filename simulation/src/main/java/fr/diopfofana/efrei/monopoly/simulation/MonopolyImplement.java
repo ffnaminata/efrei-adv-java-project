@@ -56,11 +56,7 @@ public class MonopolyImplement implements Monopoly {
             return;
         }
 
-        if (players.getPlayerIsInJail(playerName)){
-            players.setPlayerRoundsInJail(playerName, players.getPlayerRoundsInJail(playerName) + 1);
-        }
-
-        // Ordre d'acheter la case ou le joueur se trouve
+        // Ordre
         if (order == OrderKind.BUY){
             orderManager.buy(playerName, positionManager, balanceManager, gameManager);
         }
@@ -68,22 +64,27 @@ public class MonopolyImplement implements Monopoly {
             orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
         }
 
-        // Ordre de faire avancer le prochain joueur
+        // Faire avancer le prochain joueur
         dicesResult = dices.throwTwoSixSidedDices();
         orderManager.idle(dicesResult, playerName, players, gameManager, positionManager, board);
 
         // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         String nextPlayerName = gameManager.getNextPlayerName(playerName, players.getPlayersName());
 
+        // Aller en prison si besoin
+        checkIfGoToJailAndGo(nextPlayerName);
+
+        // Update tours en prison
+        if (players.getPlayerIsInJail(nextPlayerName)){
+            players.setPlayerRoundsInJail(nextPlayerName, players.getPlayerRoundsInJail(nextPlayerName) + 1);
+        }
+
         if (isThirdRoundInJailAndPay(nextPlayerName)){
-            positionManager.toMove(dicesResult, playerName, players, board);
+            orderManager.pay_prison(nextPlayerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
         }
 
         // Payement de loyer si besoin
         checkIfRentToPayAndPay(nextPlayerName, dicesResult);
-
-        // Aller en prison si besoin
-        checkIfGoToJailAndGo(nextPlayerName);
 
         // Mise a jour du current player
         this.currentPlayer = nextPlayerName;
@@ -112,7 +113,7 @@ public class MonopolyImplement implements Monopoly {
     }
 
     private boolean isThirdRoundInJailAndPay(String playerName){
-        return players.getPlayerRoundsInJail(playerName) == 3;
+        return players.getPlayerRoundsInJail(playerName) == 2;
     }
 }
 

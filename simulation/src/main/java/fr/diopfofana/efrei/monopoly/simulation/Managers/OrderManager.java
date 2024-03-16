@@ -30,7 +30,7 @@ public class OrderManager {
     }
 
     public void pay_prison(String playerName, Players players, PositionManager positionManager , BalanceManager balanceManager, GameManager gameManager, int dicesResult, List<Location> board){
-        if (players.getPlayerRoundsInJail(playerName) > 1 ){
+        if (players.getPlayerRoundsInJail(playerName) > 0 ){
             BigDecimal amount = BigDecimal.valueOf(50);
             balanceManager.toDebit(amount, playerName, gameManager, positionManager);
             players.setPlayerIsInJail(playerName, false);
