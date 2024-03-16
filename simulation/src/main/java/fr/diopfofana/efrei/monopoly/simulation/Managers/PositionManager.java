@@ -1,6 +1,7 @@
 package fr.diopfofana.efrei.monopoly.simulation.Managers;
 
 import fr.arsenelapostolet.efrei.monopoly.Location;
+import fr.diopfofana.efrei.monopoly.simulation.Players;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +34,13 @@ public class PositionManager {
         playersLocation.put(playerName, playerLocation);
     }
 
-    public void toMove(int dicesResult, String playerName, List<Location> board){
-        Location playerLocation = playersLocation.get(playerName);
-        int playerLocationIndex = board.indexOf(playerLocation);
-        int  newPlayerLocationIndex = (playerLocationIndex + dicesResult) % board.size();
-        playersLocation.put(playerName, board.get(newPlayerLocationIndex));
+    public void toMove(int dicesResult, String playerName, Players players, List<Location> board){
+        if (!players.getPlayerIsInJail(playerName)){
+            Location playerLocation = playersLocation.get(playerName);
+            int playerLocationIndex = board.indexOf(playerLocation);
+            int  newPlayerLocationIndex = (playerLocationIndex + dicesResult) % board.size();
+            playersLocation.put(playerName, board.get(newPlayerLocationIndex));
+        }
     }
 
     public void removePlayerFromPlayersPosition(String playerName){

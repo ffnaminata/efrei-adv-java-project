@@ -12,18 +12,19 @@ import java.util.*;
 public class MonopolyImplement implements Monopoly {
     private final Dices dices;
     private final List<Location> board;
-    private final List<String> playersName;
+    private final Players players;
     private final BalanceManager balanceManager;
     private final OrderManager orderManager;
     private final GameManager gameManager;
     private final PositionManager positionManager;
     private String currentPlayer;
+    private int dicesResult;
 
     public MonopolyImplement(Dices dices, List<String> playersName) {
         Parser parser = new Parser();
         this.dices = dices;
         this.board = parser.loadMonopolyDataFromCSV();
-        this.playersName = playersName;
+        this.players = new Players(playersName);
         this.positionManager = new PositionManager(playersName, board);
         this.balanceManager = new BalanceManager(playersName);
         this.orderManager = new OrderManager();
@@ -31,7 +32,6 @@ public class MonopolyImplement implements Monopoly {
         this.currentPlayer = playersName.get(playersName.size() - 1);
         submitOrder(currentPlayer, OrderKind.IDLE);
     }
-
 
     public List<Location> getBoard() {
         return board;
@@ -56,20 +56,28 @@ public class MonopolyImplement implements Monopoly {
             return;
         }
 
+        if (players.getPlayerIsInJail(playerName)){
+            players.setPlayerRoundsInJail(playerName, players.getPlayerRoundsInJail(playerName) + 1);
+        }
+
         // Ordre d'acheter la case ou le joueur se trouve
         if (order == OrderKind.BUY){
-            orderManager.buy(playerName, positionManager, balanceManager);
+            orderManager.buy(playerName, positionManager, balanceManager, gameManager);
         }
-        if (order == OrderKind.PAY_PRISON){
-            orderManager.pay_prison(playerName, positionManager, balanceManager);
+        else if (order == OrderKind.PAY_PRISON){
+            orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
         }
 
         // Ordre de faire avancer le prochain joueur
-        int dicesResult = dices.throwTwoSixSidedDices();
-        orderManager.idle(dicesResult, playerName, playersName, gameManager, positionManager, board);
+        dicesResult = dices.throwTwoSixSidedDices();
+        orderManager.idle(dicesResult, playerName, players, gameManager, positionManager, board);
 
         // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        String nextPlayerName = gameManager.getNextPlayerName(playerName, playersName);
+        String nextPlayerName = gameManager.getNextPlayerName(playerName, players.getPlayersName());
+
+        if (isThirdRoundInJailAndPay(nextPlayerName)){
+            positionManager.toMove(dicesResult, playerName, players, board);
+        }
 
         // Payement de loyer si besoin
         checkIfRentToPayAndPay(nextPlayerName, dicesResult);
@@ -90,7 +98,7 @@ public class MonopolyImplement implements Monopoly {
                 rentAmount = playerBalance;
                 gameManager.removePlayer(playerName, positionManager, balanceManager);
             } else {
-                balanceManager.toDebit(rentAmount, playerName);
+                balanceManager.toDebit(rentAmount, playerName, gameManager, positionManager);
             }
             balanceManager.toCredit(rentAmount, playerLocation.getOwner());
         }
@@ -99,8 +107,12 @@ public class MonopolyImplement implements Monopoly {
         Location playerLocation = positionManager.getPlayerLocation(playerName);
         if (playerLocation.getKind() == Location.LocationKind.GO_TO_JAIL){
             positionManager.setPlayerLocation(playerName, board.get(10));
-            // Notifier qu'il est en prison et depuis combien de tour
+            players.setPlayerIsInJail(playerName, true);
         }
+    }
+
+    private boolean isThirdRoundInJailAndPay(String playerName){
+        return players.getPlayerRoundsInJail(playerName) == 3;
     }
 }
 

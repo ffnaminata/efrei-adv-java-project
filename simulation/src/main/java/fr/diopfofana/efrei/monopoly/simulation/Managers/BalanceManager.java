@@ -37,9 +37,13 @@ public class BalanceManager {
         return playersBalance.get(playerName).compareTo(amount) >= 0;
     }
 
-    public void toDebit(BigDecimal amount, String playerName){
+    public void toDebit(BigDecimal amount, String playerName, GameManager gameManager, PositionManager positionManager){
         BigDecimal playerBalance = playersBalance.get(playerName);
-        playersBalance.put(playerName, playerBalance.subtract(amount));
+        if (!canAfford(amount, playerName)){
+            gameManager.removePlayer(playerName, positionManager, this);
+        } else {
+            playersBalance.put(playerName, playerBalance.subtract(amount));
+        }
     }
     public void toCredit(BigDecimal amount, String playerName){
         BigDecimal playerBalance = playersBalance.get(playerName);
