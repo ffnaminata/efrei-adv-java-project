@@ -13,7 +13,7 @@ public class LocationImplement implements Location {
     private String owner;
     private final int bare;
 
-    public LocationImplement(String name, LocationKind kind, String color, int price, int bare) {
+    public LocationImplement(String name, LocationKind kind, String color, int price, int cost, int oneHouse, int twoHouses, int threeHouses, int fourHouses, int fiveHouses, int bare) {
         this.name = name;
         this.kind = kind;
         this.color = color;

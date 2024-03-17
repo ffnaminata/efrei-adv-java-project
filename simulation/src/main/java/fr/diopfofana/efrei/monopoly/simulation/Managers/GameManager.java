@@ -2,6 +2,7 @@ package fr.diopfofana.efrei.monopoly.simulation.Managers;
 
 import fr.arsenelapostolet.efrei.monopoly.GameFinishedException;
 import fr.arsenelapostolet.efrei.monopoly.Location;
+import fr.diopfofana.efrei.monopoly.simulation.Locations.LocationTax;
 import fr.diopfofana.efrei.monopoly.simulation.Players;
 
 import java.math.BigDecimal;
@@ -58,6 +59,14 @@ public class GameManager {
                 balanceManager.toDebit(playerName, rentAmount, gameManager, positionManager);
             }
             balanceManager.toCredit(playerLocation.getOwner(), rentAmount);
+        }
+    }
+
+    public void checkIfTaxToPayAndPay(String playerName, PositionManager positionManager, BalanceManager balanceManager, GameManager gameManager){
+        Location playerLocation = positionManager.getPlayerLocation(playerName);
+        if (playerLocation instanceof LocationTax){
+            BigDecimal taxAmount = BigDecimal.valueOf(playerLocation.getPrice());
+            balanceManager.toDebit(playerName, taxAmount, gameManager, positionManager);
         }
     }
 

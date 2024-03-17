@@ -21,6 +21,8 @@ public class MonopolyImplement implements Monopoly {
     private int dicesResult;
 
     public MonopolyImplement(Dices dices, List<String> playersName) {
+        Map<String, Object> orderParameters = new HashMap<>();
+
         Parser parser = new Parser();
         this.dices = dices;
         this.board = parser.loadMonopolyDataFromCSV();
@@ -30,7 +32,7 @@ public class MonopolyImplement implements Monopoly {
         this.orderManager = new OrderManager();
         this.gameManager = new GameManager();
         this.currentPlayer = playersName.get(playersName.size() - 1);
-        submitOrder(currentPlayer, OrderKind.IDLE);
+        submitOrder(currentPlayer, OrderKind.IDLE, orderParameters);
     }
 
     public List<Location> getBoard() {
@@ -48,7 +50,7 @@ public class MonopolyImplement implements Monopoly {
     }
 
     @Override
-    public void submitOrder(String playerName, OrderKind order) {
+    public void submitOrder(String playerName, OrderKind order, Map<String, Object> orderParameters) {
         // Verification condition fin de jeu
         gameManager.throwExceptionIfGameFinished(positionManager);
 
@@ -71,6 +73,7 @@ public class MonopolyImplement implements Monopoly {
         gameManager.updateRoundsInJail(nextPlayerName, players);
         gameManager.checkIfThirdRoundInJailAndPay(nextPlayerName, players, orderManager, positionManager, balanceManager, gameManager,  dicesResult, board);
         gameManager.checkIfRentToPayAndPay(nextPlayerName, players, dicesResult, positionManager, balanceManager, gameManager, board);
+        gameManager.checkIfTaxToPayAndPay(nextPlayerName, positionManager, balanceManager, gameManager);
 
         // Mise a jour du current player
         this.currentPlayer = nextPlayerName;

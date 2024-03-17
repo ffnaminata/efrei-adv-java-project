@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class LocationStation extends LocationImplement{
-    public LocationStation(String name, Location.LocationKind kind, String color, int price, int bare) {
-        super(name, kind, color, price, bare);
+    public LocationStation(String name, LocationKind kind, String color, int price, int cost, int oneHouse, int twoHouses, int threeHouses, int fourHouses, int fiveHouses, int bare) {
+        super(name, kind, color, price, cost, oneHouse, twoHouses, threeHouses, fourHouses, fiveHouses, bare);
     }
 
     @Override
