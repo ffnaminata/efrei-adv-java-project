@@ -22,8 +22,6 @@ public class MonopolyImplement implements Monopoly {
 
     public MonopolyImplement(Dices dices, List<String> playersName) {
         Map<String, Object> orderParameters = new HashMap<>();
-
-
         this.dices = dices;
         this.board = new Board();
         this.players = new Players(playersName);
@@ -35,6 +33,7 @@ public class MonopolyImplement implements Monopoly {
         submitOrder(currentPlayer, OrderKind.IDLE, orderParameters);
     }
 
+    @Override
     public List<Location> getBoard() {
         return board.getBoard();
     }
