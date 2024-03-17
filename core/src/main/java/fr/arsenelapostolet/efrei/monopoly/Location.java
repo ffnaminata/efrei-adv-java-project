@@ -9,14 +9,23 @@ public interface Location {
 
     LocationKind getKind();
 
-    String getOwner();
     String getColor();
-
-    int getBare();
 
     int getPrice();
 
+    public int getCost();
+
+    public List<Integer> getLvl();
+
+    int getBare();
+
+    String getOwner();
+
     void setOwner(String playerName);
+
+    public int getNumberOfBuilding();
+
+    public void setNumberOfBuilding(int numberOfBuilding);
 
     BigDecimal getRent(int dicesResult, int numberOfStationOwned, List<Location> board);
 

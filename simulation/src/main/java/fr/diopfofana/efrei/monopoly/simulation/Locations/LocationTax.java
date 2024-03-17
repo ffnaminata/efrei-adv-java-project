@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class LocationTax extends LocationImplement{
-    public LocationTax(String name, LocationKind kind, String color, int price, int cost, int oneHouse, int twoHouses, int threeHouses, int fourHouses, int fiveHouses, int bare) {
-        super(name, kind, color, price, cost, oneHouse, twoHouses, threeHouses, fourHouses, fiveHouses, bare);
+    public LocationTax(String name, LocationKind kind, String color, int price, int cost, int lvl1, int lvl2, int lvl3, int lvl4, int lvl5, int bare) {
+        super(name, kind, color, price, cost, lvl1, lvl2, lvl3, lvl4, lvl5, bare);
     }
 }

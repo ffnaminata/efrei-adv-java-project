@@ -11,7 +11,7 @@ import java.util.*;
 
 public class MonopolyImplement implements Monopoly {
     private final Dices dices;
-    private final List<Location> board;
+    private final Board board;
     private final Players players;
     private final BalanceManager balanceManager;
     private final OrderManager orderManager;
@@ -23,11 +23,11 @@ public class MonopolyImplement implements Monopoly {
     public MonopolyImplement(Dices dices, List<String> playersName) {
         Map<String, Object> orderParameters = new HashMap<>();
 
-        Parser parser = new Parser();
+
         this.dices = dices;
-        this.board = parser.loadMonopolyDataFromCSV();
+        this.board = new Board();
         this.players = new Players(playersName);
-        this.positionManager = new PositionManager(playersName, board);
+        this.positionManager = new PositionManager(playersName, board.getBoard());
         this.balanceManager = new BalanceManager(playersName);
         this.orderManager = new OrderManager();
         this.gameManager = new GameManager();
@@ -36,7 +36,7 @@ public class MonopolyImplement implements Monopoly {
     }
 
     public List<Location> getBoard() {
-        return board;
+        return board.getBoard();
     }
 
     @Override
@@ -60,19 +60,20 @@ public class MonopolyImplement implements Monopoly {
         // Applisquer l'ordre au joueur actuelle
         switch (order){
             case BUY -> orderManager.buy(playerName, players, positionManager, balanceManager, gameManager);
-            case PAY_PRISON -> orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board);
+            case PAY_PRISON -> orderManager.pay_prison(playerName, players, positionManager, balanceManager, gameManager,  dicesResult, board.getBoard());
+            case BUILD -> orderManager.build(playerName, orderParameters.get("propertyName").toString(), positionManager, balanceManager, gameManager, board);
         }
 
         // Faire avancer le prochain joueur
         dicesResult = dices.throwTwoSixSidedDices();
-        orderManager.idle(dicesResult, playerName, players, gameManager, positionManager, balanceManager, board);
+        orderManager.idle(dicesResult, playerName, players, gameManager, positionManager, balanceManager, board.getBoard());
 
         // Application des consequences
         String nextPlayerName = gameManager.getNextPlayerName(playerName, players.getPlayersName());
-        gameManager.checkIfGoToJailAndGo(nextPlayerName, players, positionManager, board);
+        gameManager.checkIfGoToJailAndGo(nextPlayerName, players, positionManager, board.getBoard());
         gameManager.updateRoundsInJail(nextPlayerName, players);
-        gameManager.checkIfThirdRoundInJailAndPay(nextPlayerName, players, orderManager, positionManager, balanceManager, gameManager,  dicesResult, board);
-        gameManager.checkIfRentToPayAndPay(nextPlayerName, players, dicesResult, positionManager, balanceManager, gameManager, board);
+        gameManager.checkIfThirdRoundInJailAndPay(nextPlayerName, players, orderManager, positionManager, balanceManager, gameManager,  dicesResult, board.getBoard());
+        gameManager.checkIfRentToPayAndPay(nextPlayerName, players, dicesResult, positionManager, balanceManager, gameManager, board.getBoard());
         gameManager.checkIfTaxToPayAndPay(nextPlayerName, positionManager, balanceManager, gameManager);
 
         // Mise a jour du current player

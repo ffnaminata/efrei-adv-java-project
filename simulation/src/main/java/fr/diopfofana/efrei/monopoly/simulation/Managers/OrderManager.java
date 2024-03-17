@@ -2,10 +2,14 @@ package fr.diopfofana.efrei.monopoly.simulation.Managers;
 
 import fr.arsenelapostolet.efrei.monopoly.Dices;
 import fr.arsenelapostolet.efrei.monopoly.Location;
+import fr.diopfofana.efrei.monopoly.simulation.Board;
+import fr.diopfofana.efrei.monopoly.simulation.Locations.LocationImplement;
 import fr.diopfofana.efrei.monopoly.simulation.Players;
 
+import javax.swing.plaf.PanelUI;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static fr.arsenelapostolet.efrei.monopoly.Location.LocationKind.JAIL;
@@ -40,6 +44,15 @@ public class OrderManager {
             players.setPlayerIsInJail(playerName, false);
             players.setPlayerRoundsInJail(playerName, 0);
             positionManager.toMove(dicesResult, playerName, players, gameManager, balanceManager, board);
+        }
+    }
+    public void build(String playerName, String locationName, PositionManager positionManager, BalanceManager balanceManager, GameManager gameManager, Board board){
+        Location location = positionManager.getLocationFromLocationName(locationName, board.getBoard());
+        if (board.isOwnerOfAllColorLocation(playerName, location.getColor()) && location.getNumberOfBuilding() < 5){
+            balanceManager.toDebit(playerName, BigDecimal.valueOf(location.getCost()), gameManager, positionManager);
+            if (balanceManager.getPlayersBalance().containsKey(playerName)){
+                location.setNumberOfBuilding(location.getNumberOfBuilding() + 1);
+            }
         }
     }
 }

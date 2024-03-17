@@ -34,6 +34,15 @@ public class PositionManager {
         playersLocation.put(playerName, playerLocation);
     }
 
+    public Location getLocationFromLocationName(String locationName, List<Location> board){
+        for (Location location : board){
+            if (locationName.equals(location.getName())){
+                return location;
+            }
+        }
+        return null;
+    }
+
     public void toMove(int dicesResult, String playerName, Players players, GameManager gameManager, BalanceManager balanceManager, List<Location> board){
         if (!players.getPlayerIsInJail(playerName)){
             Location playerLocation = playersLocation.get(playerName);

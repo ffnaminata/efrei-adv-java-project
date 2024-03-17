@@ -49,16 +49,9 @@ public class GameManager {
     public void checkIfRentToPayAndPay(String playerName, Players players, int dicesResult, PositionManager positionManager, BalanceManager balanceManager, GameManager gameManager, List<Location> board){
         Location playerLocation = positionManager.getPlayerLocation(playerName);
         if (!playerLocation.getOwner().isEmpty()){
-            BigDecimal playerBalance = balanceManager.getPlayerBalance(playerName);
             int numberOfStationOwnedByLocationOwner = players.getPlayersNumberOfStationOwned(playerLocation.getOwner());
             BigDecimal rentAmount = playerLocation.getRent(dicesResult, numberOfStationOwnedByLocationOwner, board);
-            if (!balanceManager.canAfford(rentAmount, playerName)){
-                rentAmount = playerBalance;
-                gameManager.removePlayer(playerName, positionManager, balanceManager);
-            } else {
-                balanceManager.toDebit(playerName, rentAmount, gameManager, positionManager);
-            }
-            balanceManager.toCredit(playerLocation.getOwner(), rentAmount);
+            balanceManager.toDeal(playerName, playerLocation.getOwner(), rentAmount, gameManager, positionManager);
         }
     }
 
